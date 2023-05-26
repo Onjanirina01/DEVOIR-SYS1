@@ -1,0 +1,30 @@
+ name: Installation de Apache2 sur le serveur
+  hosts: apache2
+  remote_user: root
+  vars:
+    domains:
+      - www.hei.school
+      - front.hei.school
+      - back.hei.School
+      - api.hei.school
+
+  tasks:
+    - name: Installing all the required tools
+      apt:
+        name: "{{ url }}"
+        state: latest
+      with_items:
+        - apache2
+
+    - name: Creating the VirtualHost configuration file
+      ansible.builtin.template:
+        src: templates/domain.conf
+        dest: "/etc/apache2/sites-available/{{ url }}.conf"
+      loop: "{{ domains }}"
+
+    - name: Creating symbolic links
+      command: ln -s /etc/apache2/sites-available/{{ url }}.conf /etc/apache2/sites-enabled/{{ url }}.conf
+      loop: "{{ domains }}"
+
+    - name: Restart the apache2 server
+      command: /etc/init.d/apache2 r
